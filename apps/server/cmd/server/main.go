@@ -3,8 +3,14 @@ package main
 import (
 	"net/http"
 	"os"
+	"outpost-engine/internal/database"
+	"outpost-engine/internal/handlers"
+	"outpost-engine/internal/middleware"
+	"outpost-engine/internal/modules/post"
+	"outpost-engine/internal/modules/user"
 
 	"github.com/gin-gonic/gin"
+	"github.com/hibiken/asynq"
 	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 )
@@ -34,6 +40,12 @@ func main() {
 
 	logger.Info("Starting outpost-engine server")
 
+	db, err := database.ConnectDatabase(logger)
+	if err != nil {
+		logger.Fatal("failed to connect database", zap.Error(err))
+	}
+	defer db.Close()
+
 	// Get host from environment
 	host := os.Getenv("HOST")
 	if host == "" {
@@ -42,7 +54,7 @@ func main() {
 	// Get HTTP port from environment
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = "8001"
 	}
 	addr := host + ":" + port
 
@@ -67,13 +79,32 @@ func main() {
 		c.Next()
 	})
 
+	// Asynq client (Redis) — enqueues publish tasks
+	redisAddr := os.Getenv("REDIS_ADDR")
+	if redisAddr == "" {
+		redisAddr = "localhost:6379"
+	}
+	asynqClient := asynq.NewClient(asynq.RedisClientOpt{Addr: redisAddr})
+	defer asynqClient.Close()
+
+	// handler post, social, dan user
+	userHandler := user.NewUserHandler(db)
+	postHandler := post.NewPostHandler(db, asynqClient)
+
+	// Public auth routes
+	r.POST("/auth/register", userHandler.Register)
+	r.POST("/auth/login", userHandler.Login)
+
+	// Protected routes
+	auth := r.Group("/")
+	auth.Use(middleware.AuthMiddleware())
+	auth.GET("/auth/me", userHandler.Me) // profile
+
+	auth.POST("/posts", postHandler.CreatePost)
+	auth.GET("/posts", postHandler.GetPosts)
+
 	// Health check endpoint
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"status":  "ok",
-			"message": "Server is running",
-		})
-	})
+	r.GET("/health", handlers.HealthCheck)
 
 	// Root endpoint
 	r.GET("/", func(c *gin.Context) {
