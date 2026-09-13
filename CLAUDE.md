@@ -1,34 +1,25 @@
-# outpost-engine
+# queuepost-engine
 
 This file provides context about the project for AI assistants.
 
 ## Project Overview
 
-- **Ecosystem**: Typescript
+- **Project Type**: Multi-Platform Social Media Scheduler & Publisher (Modular Monolith Monorepo)
+- **Ecosystem**: TypeScript & Go
 
-## Tech Stack
+## Tech Stack & Runtime
 
-- **Runtime**: bun
-- **Package Manager**: npm
-
-### Frontend
-
-- Framework: react-vite
-- CSS: tailwind
-- UI Library: nextui
-
-### Database
-
-- Database: postgres
-
-### Additional Features
-
-- Testing: vitest
+- **Package Manager**: npm / pnpm
+- **Workspace Runner**: Turborepo (`workspaceRunner:universal:turborepo`)
+- **Frontend**: React + Vite (`frontend:typescript:react-vite`), Tailwind CSS, NextUI, Framer Motion, React Hook Form
+- **Backend**: Go + Gin (`backend:go:gin`), Uber Zap (`backend.logging:go:zap`), Redis + Asynq (Queue)
+- **Database**: PostgreSQL (`database:universal:postgres`)
+- **Testing**: Vitest
 
 ## Project Structure
 
 ```
-outpost-engine/
+queuepost-engine/
 ├── apps/
 │   ├── web/         # Frontend application
 ├── packages/

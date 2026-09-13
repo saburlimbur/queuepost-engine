@@ -1,6 +1,6 @@
-# outpost-engine
+# queuepost-engine
 
-Created with [Better Fullstack](https://github.com/Marve10s/Better-Fullstack).
+A high-performance **Multi-Platform Social Media Scheduler & Publisher** built as a single-repo modular monolith. Created with [Better Fullstack](https://github.com/Marve10s/Better-Fullstack).
 
 ## Applications and resources
 
