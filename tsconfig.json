@@ -1,0 +1,3 @@
+{
+  "extends": "@outpost-engine/config/tsconfig.base.json"
+}
